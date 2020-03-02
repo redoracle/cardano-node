@@ -262,12 +262,18 @@ executable chairman
 
 test-suite cardano-node-test
   hs-source-dirs:       test
-  main-is:              Spec.hs
+
+  main-is:              Test-cli.hs
   type:                 exitcode-stdio-1.0
 
   build-depends:
                         base >=4.12 && <5
                       , cardano-prelude
+                      , directory
+                      , process
+                      , text
+                      , time
+                      , turtle
 
   default-language:     Haskell2010
   default-extensions:   NoImplicitPrelude
