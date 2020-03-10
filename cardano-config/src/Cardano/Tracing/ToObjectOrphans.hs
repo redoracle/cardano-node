@@ -21,6 +21,7 @@ import           Cardano.Prelude hiding (atomically, show)
 import           Prelude (String, show, id)
 
 import           Data.Aeson (Value (..), toJSON, (.=))
+import           Data.Hash.IsHash (IsHash, mediumHashHex)
 import           Data.Text (pack)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Network.Socket as Socket (SockAddr)
@@ -643,8 +644,8 @@ readableForgeEventTracer tracer = Tracer $ \case
 --
 -- NOTE: this list is sorted by the unqualified name of the outermost type.
 
-instance ( Condense (HeaderHash blk)
-         , Condense (TxId (GenTx blk))
+instance ( IsHash (HeaderHash blk)
+         , IsHash (TxId (GenTx blk))
          , HasHeader blk
          , HasTxs blk
          , HasTxId (GenTx blk)
@@ -653,12 +654,12 @@ instance ( Condense (HeaderHash blk)
   toObject _verb (AnyMessage (MsgBlock blk)) =
     mkObject
       [ "kind" .= String "MsgBlock"
-      , "blkid" .= String (pack . condense $ blockHash blk)
+      , "blkid" .= String (mediumHashHex $ blockHash blk)
       , "txids" .= toJSON (presentTx <$> extractTxs blk)
       ]
    where
      presentTx :: GenTx blk -> Value
-     presentTx =  String . pack . condense . txId
+     presentTx =  String . mediumHashHex . txId
   toObject _v (AnyMessage MsgRequestRange{}) =
     mkObject [ "kind" .= String "MsgRequestRange" ]
   toObject _v (AnyMessage MsgStartBatch{}) =

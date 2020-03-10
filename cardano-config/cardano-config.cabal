@@ -22,12 +22,14 @@ library
                        Cardano.Config.Topology
                        Cardano.Config.Types
                        Cardano.Tracing.ToObjectOrphans
+                       Data.Hash.IsHash
 
   build-depends:       base >=4.12 && <5
                      , aeson
                      , async
                      , bytestring
                      , cardano-binary
+                     , cardano-crypto-class
                      , cardano-crypto-wrapper
                      , cardano-ledger
                      , cardano-prelude
@@ -36,12 +38,14 @@ library
                      , cborg
                      , contra-tracer
                      , file-embed
+                     , formatting
                      , generic-monoid
                      , iohk-monitoring
                      , lobemo-backend-aggregation
                      , lobemo-backend-ekg
                      , lobemo-backend-monitoring
                      , lobemo-scribe-systemd
+                     , memory
                      , network
                      , network-mux
                      , optparse-applicative
@@ -59,6 +63,7 @@ library
                      , stm
                      , template-haskell
                      , text
+                     , text-builder
                      , transformers
                      , transformers-except
                      , typed-protocols
