@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Cardano.Common.LocalSocket
   ( chooseSocketPath
@@ -8,13 +9,24 @@ module Cardano.Common.LocalSocket
   )
 where
 
+import           Prelude (show)
 import           Cardano.Prelude
 
+import           Control.Monad.Trans.Except.Extra (firstExceptT, hoistEither)
 import           System.Directory (createDirectoryIfMissing, removeFile)
 import           System.FilePath (takeDirectory)
 import           System.IO.Error (isDoesNotExistError)
 
 import           Cardano.Config.Types
+
+-- | Errors for the current module.
+data SocketError
+    = SocketErrorFileNotFound !FilePath
+
+-- | Instance for showing the @ConfigError@.
+instance Show SocketError where
+    show (SocketErrorFileNotFound fp)
+        = "Socket '" <> fp <> "' not found!"
 
 -- | This lets us override the socket path specified in the node configuration yaml file
 -- if required.
@@ -41,9 +53,8 @@ localSocketPath (SocketFile fp) = do
   createDirectoryIfMissing True $ takeDirectory fp
   return fp
 
--- TODO: Convert to ExceptT
 -- | Remove the socket established with 'localSocketAddrInfo'.
-removeStaleLocalSocket :: NodeConfiguration -> NodeProtocolMode -> IO ()
+removeStaleLocalSocket :: NodeConfiguration -> NodeProtocolMode -> ExceptT SocketError IO ()
 removeStaleLocalSocket nc npm = do
   mCliSockPath <- case npm of
                     MockProtocolMode (NodeMockCLI {mockMscFp}) -> pure $ socketFile mockMscFp
@@ -51,8 +62,6 @@ removeStaleLocalSocket nc npm = do
 
   (SocketFile socketFp) <- pure $ chooseSocketPath (ncSocketPath nc) mCliSockPath
 
-  removeFile socketFp
-    `catch` \e ->
-      if isDoesNotExistError e
-        then return ()
-        else throwIO e
+  exception <- liftIO $ tryJust (guard . isDoesNotExistError) (removeFile socketFp)
+  firstExceptT (\_ -> SocketErrorFileNotFound socketFp) . hoistEither $ exception
+
