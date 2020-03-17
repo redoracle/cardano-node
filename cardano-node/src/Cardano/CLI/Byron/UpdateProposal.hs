@@ -118,7 +118,6 @@ createUpdateProposal dbFile configFile sKey paramsToUpdate = do
 
   pure proposal
 
-
 getFileModificationTime :: FilePath -> IO (FilePath, UTCTime)
 getFileModificationTime fp = getModificationTime fp >>= \timeModded -> pure (fp, timeModded)
 
