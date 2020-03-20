@@ -127,6 +127,7 @@ let
       stackageSrc = (import pkgs.path (import sources."haskell.nix")).haskell-nix.stackageSrc;
     };
     mainnetNodeConfig = (import ./. {}).environments.mainnet.nodeConfig;
+    mainnetTopologyFile = (import ./. {}).scripts.mainnet.node.topologyFile;
   } // extraBuilds // (mkRequiredJob (
       collectTests jobs.native.checks ++
       collectTests jobs."${mingwW64.config}".checks ++
