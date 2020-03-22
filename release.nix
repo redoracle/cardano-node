@@ -137,12 +137,12 @@ let
       jobs."${mingwW64.config}".cardano-node.x86_64-linux
       jobs.cardano-node-win64
       jobs.dockerImageArtifact
-      jobs.mainnetNodeConfig
-      jobs.mainnetTopologyFile
 
       (map (cluster: jobs.${cluster}.scripts.node.x86_64-linux) [ "mainnet" "testnet" "staging" ])
 
       jobs.nixosTests.chairmansCluster.x86_64-linux
+      jobs.mainnetNodeConfig
+      jobs.mainnetTopologyFile
     ]));
 
 in jobs
