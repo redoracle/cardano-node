@@ -129,6 +129,8 @@ let
     mainnetNodeConfig = (import ./. {}).environments.mainnet.nodeConfig;
     mainnetTopologyFile = (import ./. {}).scripts.mainnet.node.topologyFile;
   } // extraBuilds // (mkRequiredJob (
+      jobs.mainnetNodeConfig ++
+      jobs.mainnetTopologyFile ++
       collectTests jobs.native.checks ++
       collectTests jobs."${mingwW64.config}".checks ++
       collectTests jobs.native.benchmarks ++ [
@@ -141,8 +143,6 @@ let
       (map (cluster: jobs.${cluster}.scripts.node.x86_64-linux) [ "mainnet" "testnet" "staging" ])
 
       jobs.nixosTests.chairmansCluster.x86_64-linux
-      jobs.mainnetNodeConfig
-      jobs.mainnetTopologyFile
     ]));
 
 in jobs
