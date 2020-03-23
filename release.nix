@@ -128,9 +128,7 @@ let
     };
     mainnetNodeConfig = (import ./. {}).environments.mainnet.nodeConfig;
     mainnetTopologyFile = (import ./. {}).scripts.mainnet.node.topologyFile;
-  } // extraBuilds // (mkRequiredJob (
-      jobs.mainnetNodeConfig ++
-      jobs.mainnetTopologyFile ++
+  } // extraBuilds // jobs.mainnetNodeConfig // jobs.mainnetTopologyFile // (mkRequiredJob (
       collectTests jobs.native.checks ++
       collectTests jobs."${mingwW64.config}".checks ++
       collectTests jobs.native.benchmarks ++ [
