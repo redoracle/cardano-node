@@ -63,7 +63,7 @@ import qualified Ouroboros.Consensus.Cardano as Consensus
 
 import           Cardano.CLI.Byron.Parsers (ByronCommand(..))
 import           Cardano.CLI.Byron.UpdateProposal
-                   (createUpdateProposal, serialiseByronUpdateProposal)
+                   (createUpdateProposal, serialiseByronUpdateProposal, submitByronUpdateProposal)
 import           Cardano.CLI.Delegation
 import           Cardano.CLI.Genesis
 import           Cardano.CLI.Key
@@ -85,6 +85,10 @@ runCommand (ByronClientCommand (UpdateProposal dbFp configFp sKey outputFp param
   sK <- readSigningKey RealPBFT sKey
   proposal <- createUpdateProposal dbFp configFp sK paramsToUpdate
   ensureNewFileLBS outputFp (serialiseByronUpdateProposal proposal)
+
+runCommand (ByronClientCommand (SubmitUpdateProposal configFp proposalFp dbFp mSocket)) =
+  withIOManagerE $ \iocp -> submitByronUpdateProposal iocp configFp proposalFp dbFp mSocket
+
 
 runCommand DisplayVersion = do
   liftIO . putTextLn

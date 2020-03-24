@@ -42,6 +42,12 @@ data ByronCommand = UpdateProposal
                     SigningKeyFile
                     FilePath
                     [ParametersToUpdate]
+                  | SubmitUpdateProposal
+                    ConfigYamlFilePath
+                    -- Update proposal filepath.
+                    FilePath
+                    DbFile
+                    (Maybe CLISocketPath)
                     deriving Show
 
 parseByronCommands :: Parser ByronCommand

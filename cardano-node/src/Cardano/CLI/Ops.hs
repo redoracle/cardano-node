@@ -204,8 +204,8 @@ serialiseSigningKey ptcl _ = Left $ ProtocolNotSupported ptcl
 -- | Exception type for all errors thrown by the CLI.
 --   Well, almost all, since we don't rethrow the errors from readFile & such.
 data CliError
-  = CBORDecodingError DeserialiseFailure
-  | CBORPrettyPrintError DeserialiseFailure
+  = CBORDecodingError !DeserialiseFailure
+  | CBORPrettyPrintError !DeserialiseFailure
   | CertificateValidationErrors !FilePath ![Text]
   | DelegationError !Genesis.GenesisDelegationError
   | DlgCertificateDeserialisationFailed !FilePath !Text
@@ -220,7 +220,7 @@ data CliError
   | NotEnoughTxOutputs
   | NoGenesisDelegationForKey !Text
   | OutputMustNotAlreadyExist !FilePath
-  | ProtocolError ProtocolInstantiationError
+  | ProtocolError !ProtocolInstantiationError
   | ProtocolNotSupported !Protocol
   | ProtocolParametersParseFailed !FilePath !Text
   | ReadCBORFileFailure !FilePath !Text
@@ -231,8 +231,10 @@ data CliError
   | SigningKeyDeserialisationFailed !FilePath !DeserialiseFailure
   | SpendGenesisUTxOError !RealPBFTError
   | UpdateProposalBlockReadError !FilePath !Text
+  | UpdateProposalDecodingError !DecoderError
   | UpdateProposalEpochBoundaryBlockError !Text
   | UpdateProposalFileModificationError ![FilePath] !Text
+  | UpdateProposalSubmissionError !RealPBFTError
   | VerificationKeyDeserialisationFailed !FilePath !Text
   | FileNotFoundError !FilePath
 
@@ -295,11 +297,15 @@ instance Show CliError where
     = "Transaction file '" <> fp <> "' read failure: "<> show err
   show (UpdateProposalBlockReadError fp err)
     = "Error reading block at: " <> fp <> "Error: " <> T.unpack err
+  show (UpdateProposalDecodingError err)
+    = "Error decoding update proposal: " <> show err
   show (UpdateProposalEpochBoundaryBlockError err)
     = "Error creating update proposal due to: " <> T.unpack err
   show (UpdateProposalFileModificationError fps err)
     = "Error checking for the latest created block in: " <> show fps
       <> " Failure: " <> T.unpack err
+  show (UpdateProposalSubmissionError pbftErr)
+    = "Error submitting update proposal: " <> show pbftErr
   show (VerificationKeyDeserialisationFailed fp err)
     = "Verification key '" <> fp <> "' read failure: "<> T.unpack err
   show (FileNotFoundError fp)
