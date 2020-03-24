@@ -31,8 +31,8 @@ import           Cardano.Chain.Update (InstallerHash(..), SoftforkRule(..), Syst
 
 import           Cardano.CLI.Byron.UpdateProposal
 import           Cardano.Common.Parsers
-                   (command', parseConfigFile, parseDbPath, parseFilePath,
-                    parseFraction, parseLovelace, parseSigningKeyFile)
+                   (command', parseConfigFile, parseCLISocketPath, parseDbPath,
+                    parseFilePath,parseFraction, parseLovelace, parseSigningKeyFile)
 import           Cardano.Config.Types
 
 -- TODO: Other Byron commands to be put here in follow up PR.
@@ -54,8 +54,10 @@ parseByronCommands :: Parser ByronCommand
 parseByronCommands =  subparser $ mconcat
     [ commandGroup "Byron related commands"
     , metavar "Byron related commands"
-    , command' "create-byron-update-proposal" "Create Byron era update proposal."
+    , command' "create-byron-update-proposal" "Create a Byron era update proposal."
         $ parseAllParamsToUpdate
+    , command' "submit-byron-update-proposal" "Submit a Byron era update proposal."
+        $ parseByronUpdateProposalSubmission
     ]
 
 parseAllParamsToUpdate :: Parser ByronCommand
@@ -81,6 +83,13 @@ parseAllParamsToUpdate = do
     <*> parseTxFeePolicy
     <*> parseUnlockStakeEpoch
 
+parseByronUpdateProposalSubmission :: Parser ByronCommand
+parseByronUpdateProposalSubmission =
+  SubmitUpdateProposal
+    <$> (ConfigYamlFilePath <$> parseConfigFile)
+    <*> parseFilePath "filepath" "Filepath of Byron update proposal."
+    <*> (DbFile <$> parseDbPath)
+    <*> parseCLISocketPath "Path to a cardano-node socket."
 --------------------------------------------------------------------------------
 -- CLI Parsers
 --------------------------------------------------------------------------------
