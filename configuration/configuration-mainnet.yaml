@@ -167,7 +167,7 @@ TraceLocalTxSubmissionServer: False
 TraceMempool: True
 
 # Trace Mux Events
-TraceMux: False
+TraceMux: True
 
 # Trace TxSubmission server (inbound transactions).
 TraceTxInbound: False
