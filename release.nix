@@ -69,6 +69,18 @@ let
       EOF
     '';
   in wrapImage image;
+
+  mainnetConfig = let
+    inherit ((import ./. {}).scripts.mainnet) topologyFile nodeConfigFile;
+    wrapConfig = name: file: pkgs.runCommand name {} ''
+      mkdir -p $out/nix-support
+      echo "file ${file}" > $out/nix-support/hydra-build-products
+    '';
+  in {
+    mainnetTopology = wrapConfig "topology.yaml" topologyFile;
+    mainnetNodeConfig = wrapConfig "config.json" nodeConfigFile;
+  };
+
   mkPins = inputs: pkgs.runCommand "ifd-pins" {} ''
     mkdir $out
     cd $out
@@ -126,9 +138,8 @@ let
       hackageSrc = (import pkgs.path (import sources."haskell.nix")).haskell-nix.hackageSrc;
       stackageSrc = (import pkgs.path (import sources."haskell.nix")).haskell-nix.stackageSrc;
     };
-    mainnetNodeConfig = (import ./. {}).environments.mainnet.nodeConfig;
-    mainnetTopologyFile = (import ./. {}).scripts.mainnet.node.topologyFile;
-  } // extraBuilds // jobs.mainnetNodeConfig // jobs.mainnetTopologyFile // (mkRequiredJob (
+    inherit (mainnetConfig) mainnetTopology mainnetNodeConfig;
+  } // extraBuilds // (mkRequiredJob (
       collectTests jobs.native.checks ++
       collectTests jobs."${mingwW64.config}".checks ++
       collectTests jobs.native.benchmarks ++ [
@@ -137,6 +148,8 @@ let
       jobs."${mingwW64.config}".cardano-node.x86_64-linux
       jobs.cardano-node-win64
       jobs.dockerImageArtifact
+      jobs.mainnetTopology
+      jobs.mainnetNodeConfig
 
       (map (cluster: jobs.${cluster}.scripts.node.x86_64-linux) [ "mainnet" "testnet" "staging" ])
 
